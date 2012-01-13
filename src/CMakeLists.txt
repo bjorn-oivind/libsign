@@ -10,10 +10,21 @@ if(_revision)
 	add_definitions(-DREVISION="${_revision}")
 endif(_revision)
 
+include(TestBigEndian)
+test_big_endian(BIG_ENDIAN)
+if(BIG_ENDIAN)
+        message(FATAL_ERROR "Big endian currently not supported.")
+endif(BIG_ENDIAN)
+
 # sources
 set(LIB_SOURCES
+        key.h
 	keystore.h keystore.c
+        mpi.h mpi.c
 	packet.h packet.c
+        public_key.h public_key.c
+        secret_key.h secret_key.c
+        signature.h signature.c
 	sign.h sign.c
 	verify.h verify.c)
 add_library(sign ${LIB_SOURCES})
