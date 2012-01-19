@@ -22,6 +22,9 @@ struct packet_parsed_callbacks
 } typedef packet_parsed_callbacks;
 
 int parse_packet_header(const uint8_t **data, uint64_t *datalen, uint64_t *packet_size);
+int process_armored_packets_from_file(const char *filename);
+int process_armored_packets_from_fd(int fd);
+int process_armored_packets_from_data(const uint8_t *data, uint64_t datalen);
 int process_packets_from_file(const char *filename);
 int process_packets_from_fd(int fd);
 int process_packets_from_data(const uint8_t *data, uint64_t datalen);

@@ -11,6 +11,21 @@
 #include <nettle/sha.h>
 #include <nettle/rsa.h>
 
+int verify(const char *public_key, const char *signature, const char *data)
+{
+    return -ENOTSUP;
+}
+
+int verify_armor(const char *public_key, const char *armored_signature,
+                 const char *data)
+{
+    /* parse the public key */
+    /* decode the signature, verify the CRC and parse the signature data */
+    /* verify the data */
+
+    return -ENOTSUP;
+}
+
 int rsa_sha1_verify_file(libsign_public_key *pub_ctx, libsign_signature *sig_ctx,
                          const char *filename)
 {

@@ -22,7 +22,7 @@ struct libsign_signature
     enum pgp_public_key_algorithm pk_algo;
     enum pgp_hash_algorithm hash_algo;
 
-    const uint8_t *hashed_data_start;
+    uint8_t *hashed_data_start;
     uint32_t hashed_data_len;
 
     uint16_t short_hash;

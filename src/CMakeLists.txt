@@ -18,6 +18,7 @@ endif(BIG_ENDIAN)
 
 # sources
 set(LIB_SOURCES
+        cdecode.c cencode.c
         key.h
 	keystore.h keystore.c
         mpi.h mpi.c
