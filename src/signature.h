@@ -22,7 +22,7 @@ struct libsign_signature
     enum pgp_public_key_algorithm pk_algo;
     enum pgp_hash_algorithm hash_algo;
 
-    uint8_t *hashed_data_start;
+    uint8_t *hashed_data;
     uint32_t hashed_data_len;
 
     uint16_t short_hash;
@@ -30,10 +30,17 @@ struct libsign_signature
     mpz_t s;
 } typedef libsign_signature;
 
+void signature_init(libsign_signature *sig);
+void signature_destroy(libsign_signature *sig);
+
+int parse_signature(libsign_signature *sig, const char *filename);
+
 int process_signature_packet(const uint8_t **data, uint64_t *datalen,
                              libsign_signature *ctx);
 int process_signature_subpackets(const uint8_t **data, uint64_t *datalen,
                                  int subdatalen, libsign_signature *ctx);
+
+int decode_signature_armor(uint8_t **data, uint64_t *datalen);
 
 #ifdef __cplusplus
 }

@@ -1,10 +1,104 @@
 #include "signature.h"
-
+#include "armor.h"
+#include "packet.h"
 #include "mpi.h"
 
 #include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+void signature_init(libsign_signature *sig)
+{
+    mpz_init(sig->s);
+    sig->hashed_data = NULL;
+}
+
+void signature_destroy(libsign_signature *sig)
+{
+    free(sig->hashed_data);
+    mpz_clear(sig->s);
+}
+
+int parse_signature(libsign_signature *sig, const char *filename)
+{
+    /* open the file pointed to by filename and read contents into memory */
+    int armored = 0, fd, ret = -EINVAL;
+    FILE *fp;
+    struct stat stbuf;
+    uint64_t filesize, packet_size;
+    uint32_t filename_len;
+    uint8_t *buffer;
+    const uint8_t *p;
+
+    /* examine the filename to see if the file is armored */
+    filename_len = strlen(filename);
+
+    /* is this an ascii armored file? */
+    if(filename_len > 4 && strncmp(filename + (filename_len-4), ".asc", 4) == 0)
+        armored = 1;
+
+    fd = open(filename, O_RDONLY);
+    if(fd == -1) {
+        goto exit;
+    }
+
+    fp = fdopen(fd, "rb");
+    if(!fp)
+        goto close_fd;
+
+    /* find size of file */
+    if(fstat(fd, &stbuf) == -1)
+        goto close_fp;
+
+    filesize = stbuf.st_size;
+    buffer = malloc(filesize);
+    if(!buffer)
+        goto close_fp;
+
+    /* read file into memory */
+    if(fread((uint8_t*)buffer, filesize, 1, fp) == 0)
+        goto free_buffer;
+
+    /* do we have to decode the armor? */
+    if(armored) {
+        if(decode_signature_armor(&buffer, &filesize) != 0)
+            goto free_buffer;
+    }
+
+    p = buffer;
+
+    /* parse packet headers */
+    while(filesize) {
+        int tag = parse_packet_header(&p, &filesize, &packet_size);
+        if(tag < 0)
+            goto free_buffer;
+
+        filesize -= packet_size;
+
+        switch(tag) {
+        case PGP_TAG_SIGNATURE:
+            ret = process_signature_packet(&p, &packet_size, sig);
+            if(ret < 0)
+                goto free_buffer;
+            break;
+        }
+    }
+
+    ret = 0;
+
+free_buffer:
+    free(buffer);
+close_fp:
+    fclose(fp);
+close_fd:
+    close(fd);
+exit:
+    return ret;
+}
 
 /* 5.2 */
 int process_signature_packet(const uint8_t **data, uint64_t *datalen,
@@ -18,9 +112,8 @@ int process_signature_packet(const uint8_t **data, uint64_t *datalen,
     const uint8_t *hashed_data_start;
 
     /* signature packet must be at least 12 bytes long */
-    if(*datalen < 12) {
-        printf("foo\n");
-        goto short_packet;
+    if(tmplen < 12) {
+        goto exit;
     }
 
     /* hashed data begins */
@@ -29,7 +122,6 @@ int process_signature_packet(const uint8_t **data, uint64_t *datalen,
     /* signature version */
     ctx->version = *p++;
     if(ctx->version != PGP_SIG_VER4) {
-        fprintf(stderr, "Unhandled signature version.");
         ret = -ENOTSUP;
         goto exit;
     }
@@ -49,8 +141,7 @@ int process_signature_packet(const uint8_t **data, uint64_t *datalen,
 
     /* do we have enough data? */
     if(tmplen < subdatalen) {
-        printf("bar\n");
-        goto short_packet;
+        goto exit;
     }
 
     /* we now know the length of the hashed data.
@@ -60,13 +151,13 @@ int process_signature_packet(const uint8_t **data, uint64_t *datalen,
 
     /* copy the hashed data into a new buffer so it will stick around after
        parsing. */
-    ctx->hashed_data_start = malloc(ctx->hashed_data_len);
-    if(!ctx->hashed_data_start) {
+    ctx->hashed_data = malloc(ctx->hashed_data_len);
+    if(!ctx->hashed_data) {
         ret = -ENOMEM;
         goto exit;
     }
     hashed_len = ctx->hashed_data_len;
-    hashed_data = ctx->hashed_data_start;
+    hashed_data = ctx->hashed_data;
     while(hashed_len--)
         *hashed_data++ = *hashed_data_start++;
 
@@ -82,8 +173,7 @@ int process_signature_packet(const uint8_t **data, uint64_t *datalen,
 
     /* do we have enough data? */
     if(tmplen < subdatalen) {
-        free(ctx->hashed_data_start);
-        goto short_packet;
+        goto free_hashed_data;
     }
 
     if(subdatalen) {
@@ -101,16 +191,13 @@ int process_signature_packet(const uint8_t **data, uint64_t *datalen,
         /* RSA signature value m ** d mod n. */
         mpz_init(ctx->s);
         if(mpi_to_mpz(&p, &tmplen, &ctx->s) != 0) {
-            free(ctx->hashed_data_start);
             mpz_clear(ctx->s);
-            goto short_packet;
+            goto free_hashed_data;
         }
         break;
     default:
-        fprintf(stderr, "Unhandled public key algorithm.\n");
-        free(ctx->hashed_data_start);
         ret = -ENOTSUP;
-        goto exit;
+        goto free_hashed_data;
     }
 
     *datalen -= (p - *data);
@@ -121,18 +208,32 @@ int process_signature_packet(const uint8_t **data, uint64_t *datalen,
 exit:
     return ret;
 
-short_packet:
-    fprintf(stderr, "Unexpected end in signature packet.\n");
-    return -EINVAL;
+free_hashed_data:
+    free(ctx->hashed_data);
+    return ret;
 }
 
 int process_signature_subpackets(const uint8_t **data, uint64_t *datalen,
                                  int subdatalen, libsign_signature *ctx)
 {
     /* TODO: parse subpackets. Length has already been checked. */
-    const uint8_t *p = *data;
-    p += subdatalen;
+    *data += subdatalen;
     *datalen -= subdatalen;
-    *data = p;
     return 0;
+}
+
+int decode_signature_armor(uint8_t **data, uint64_t *datalen)
+{
+    /* (6.2) for signatures, the armor header line shall be
+      "-----BEGIN PGP SIGNATURE-----" */
+    if(*datalen < 29)
+        goto error;
+
+    if(strncmp(*data, "-----BEGIN PGP SIGNATURE-----", 29) != 0)
+        goto error;
+
+    return decode_armor(data, datalen);
+
+error:
+    return -EINVAL;
 }

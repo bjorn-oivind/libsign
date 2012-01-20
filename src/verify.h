@@ -8,9 +8,7 @@
 extern "C" {
 #endif
 
-int verify(const char *public_key, const char *signature, const char *data);
-
-int verify_armor(const char *public_key, const char *armored_signature, const char *data);
+int verify(libsign_public_key *public_key, libsign_signature *signature, const char *filename);
 
 int rsa_sha1_verify_file(libsign_public_key *pub_ctx, libsign_signature *sig_ctx,
                          const char *filename);

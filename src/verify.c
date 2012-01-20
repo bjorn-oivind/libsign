@@ -11,19 +11,24 @@
 #include <nettle/sha.h>
 #include <nettle/rsa.h>
 
-int verify(const char *public_key, const char *signature, const char *data)
+int verify(libsign_public_key *public_key, libsign_signature *signature, const char *filename)
 {
-    return -ENOTSUP;
-}
-
-int verify_armor(const char *public_key, const char *armored_signature,
-                 const char *data)
-{
-    /* parse the public key */
-    /* decode the signature, verify the CRC and parse the signature data */
-    /* verify the data */
-
-    return -ENOTSUP;
+    /* TODO: check key id for public key and signature here */
+    switch(public_key->pk_algo) {
+    case PGP_RSA:
+        switch(signature->hash_algo) {
+        case PGP_SHA1:
+            return rsa_sha1_verify_file(public_key, signature, filename);
+            break;
+        default:
+            return -ENOTSUP;
+            break;
+        }
+        break;
+    default:
+        return -ENOTSUP;
+        break;
+    }
 }
 
 int rsa_sha1_verify_file(libsign_public_key *pub_ctx, libsign_signature *sig_ctx,
@@ -33,7 +38,6 @@ int rsa_sha1_verify_file(libsign_public_key *pub_ctx, libsign_signature *sig_ctx
     int ret;
     int fd = open(filename, O_RDONLY);
     if(fd == -1) {
-        fprintf(stderr, "Could not open %s: %s\n", filename, strerror(errno));
         return -EINVAL;
     }
 
@@ -48,7 +52,7 @@ int rsa_sha1_verify_fd(libsign_public_key *pub_ctx, libsign_signature *sig_ctx,
                           int fd)
 {
     /* read and verify the contents of file given by fd */
-    int ret;
+    int ret = -EINVAL;
     struct stat stbuf;
     uint64_t filesize;
     uint8_t *buffer;
@@ -56,36 +60,30 @@ int rsa_sha1_verify_fd(libsign_public_key *pub_ctx, libsign_signature *sig_ctx,
 
     fp = fdopen(fd, "rb");
     if(!fp)
-        goto error;
+        goto exit;
 
     /* find size of file */
-    if(fstat(fd, &stbuf) == -1) {
-        fclose(fp);
-        goto error;
-    }
+    if(fstat(fd, &stbuf) == -1)
+        goto close_fp;
 
     filesize = stbuf.st_size;
     buffer = malloc(filesize);
     if(!buffer) {
-        fclose(fp);
-        goto error;
+        ret = -ENOMEM;
+        goto close_fp;
     }
 
-    if(fread(buffer, filesize, 1, fp) == 0) {
-        free(buffer);
-        fclose(fp);
-        goto error;
-    }
+    if(fread(buffer, filesize, 1, fp) == 0)
+        goto free_buffer;
 
     ret = rsa_sha1_verify_data(pub_ctx, sig_ctx, (const uint8_t*)buffer, filesize);
+
+free_buffer:
     free(buffer);
+close_fp:
     fclose(fp);
-
+exit:
     return ret;
-
-error:
-    fprintf(stderr, "Could not read the given file.\n");
-    return -EINVAL;
 }
 
 /* 5.2.4 */
@@ -108,7 +106,7 @@ int rsa_sha1_verify_data(libsign_public_key *pub_ctx, libsign_signature *sig_ctx
     sha1_update(&hash, datalen, data);
     /* hash the hashed data from the signature */
     sha1_update(&hash, sig_ctx->hashed_data_len,
-                sig_ctx->hashed_data_start);
+                sig_ctx->hashed_data);
     /* then hash the trailer */
     if(sig_ctx->version == PGP_SIG_VER4) {
         uint8_t trailer[6];
@@ -127,7 +125,6 @@ int rsa_sha1_verify_data(libsign_public_key *pub_ctx, libsign_signature *sig_ctx
         sha1_update(&hash, 6, trailer);
     }
     else {
-        fprintf(stderr, "Unsupported signature version.\n");
         goto exit;
     }
 

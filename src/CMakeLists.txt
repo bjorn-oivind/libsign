@@ -18,6 +18,7 @@ endif(BIG_ENDIAN)
 
 # sources
 set(LIB_SOURCES
+        armor.h armor.c
         cdecode.c cencode.c
         key.h
 	keystore.h keystore.c

@@ -1,55 +1,31 @@
 #include "verify.h"
-#include "packet.h"
-
-#include <stdlib.h>
-
-libsign_public_key *pub_ctx = NULL;
-libsign_signature *sig_ctx = NULL;
-
-void signature_parsed(libsign_signature *s)
-{
-    if(sig_ctx) {
-        mpz_clear(sig_ctx->s);
-        free(sig_ctx->hashed_data_start);
-        free(sig_ctx);
-    }
-    sig_ctx = s;
-}
-
-void public_key_parsed(libsign_public_key *p)
-{
-    if(pub_ctx) {
-        mpz_clear(pub_ctx->n);
-        mpz_clear(pub_ctx->e);
-        free(pub_ctx);
-    }
-    pub_ctx = p;
-}
+#include "signature.h"
+#include "public_key.h"
 
 int main(int argc, char **argv)
 {
     int ret;
 
-    packet_parsed_callbacks callbacks = {
-        .signature_parsed = &signature_parsed,
-        .public_key_parsed = &public_key_parsed,
-        .secret_key_parsed = &dummy_fallback,
-    };
+    libsign_signature sig;
+    libsign_public_key pub;
 
-    set_callbacks(&callbacks);
+    signature_init(&sig);
+    public_key_init(&pub);
 
-    ret = process_packets_from_file("files/pubkey.key");
+    ret = parse_public_key(&pub, "files/pubkey.asc");
     if(ret < 0)
-        return ret;
+        goto exit;
 
-    ret = process_armored_packets_from_file("files/vmImage.asc");
+    ret = parse_signature(&sig, "files/vmImage.asc");
     if(ret < 0)
-        return ret;
+        goto destroy_pub;
 
-    ret = rsa_sha1_verify_file(pub_ctx, sig_ctx, "files/vmImage");
+    ret = verify(&pub, &sig, "files/vmImage");
 
-    signature_parsed(NULL);
-    public_key_parsed(NULL);
-
+destroy_sig:
+    signature_destroy(&sig);
+destroy_pub:
+    public_key_destroy(&pub);
+exit:
     return ret;
 }
