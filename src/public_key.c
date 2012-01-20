@@ -28,6 +28,8 @@ void public_key_destroy(libsign_public_key *pub)
 
     for(i = 0; i < pub->num_userids; i++)
         free(pub->userids[i].userid);
+
+    free(pub->userids);
 }
 
 int parse_public_key(libsign_public_key *pub, const char *filename)
