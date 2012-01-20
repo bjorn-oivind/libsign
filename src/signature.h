@@ -34,6 +34,8 @@ void signature_init(libsign_signature *sig);
 void signature_destroy(libsign_signature *sig);
 
 int parse_signature(libsign_signature *sig, const char *filename);
+int parse_signature_buffer(libsign_signature *sig, const uint8_t *buffer,
+                           uint64_t datalen);
 
 int process_signature_packet(const uint8_t **data, uint64_t *datalen,
                              libsign_signature *ctx);

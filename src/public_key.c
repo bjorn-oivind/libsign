@@ -39,7 +39,7 @@ int parse_public_key(libsign_public_key *pub, const char *filename)
     int armored = 0, fd, ret = -EINVAL;
     FILE *fp;
     struct stat stbuf;
-    uint64_t filesize, packet_size;
+    uint64_t filesize;
     uint32_t filename_len;
     uint8_t *buffer;
     const uint8_t *p;
@@ -81,39 +81,7 @@ int parse_public_key(libsign_public_key *pub, const char *filename)
 
     p = buffer;
 
-    /* parse packet headers */
-    while(filesize) {
-        int tag = parse_packet_header(&p, &filesize, &packet_size);
-        if(tag < 0)
-            goto free_buffer;
-
-        filesize -= packet_size;
-
-        switch(tag) {
-        case PGP_TAG_PUBLIC_KEY:
-            ret = process_public_key_packet(&p, &packet_size, pub);
-            if(ret < 0)
-                goto free_buffer;
-            break;
-        case PGP_TAG_PUBLIC_SUBKEY:
-            ret = process_public_key_subkey_packet(&p, &packet_size, pub);
-            if(ret < 0)
-                goto free_buffer;
-            break;
-        case PGP_TAG_SIGNATURE:
-            ret = process_public_key_signature_packet(&p, &packet_size, pub);
-            if(ret < 0)
-                goto free_buffer;
-            break;
-        case PGP_TAG_USERID:
-            ret = process_public_key_uid_packet(&p, &packet_size, pub);
-            if(ret < 0)
-                goto free_buffer;
-            break;
-        }
-    }
-
-    ret = 0;
+    ret = parse_public_key_buffer(pub, p, filesize);
 
 free_buffer:
     free(buffer);
@@ -121,6 +89,50 @@ close_fp:
     fclose(fp);
 close_fd:
     close(fd);
+exit:
+    return ret;
+}
+
+int parse_public_key_buffer(libsign_public_key *pub, const uint8_t *buffer,
+                            uint64_t datalen)
+{
+    int ret = -EINVAL;
+    uint64_t packet_size;
+
+    /* parse packet headers */
+    while(datalen) {
+        int tag = parse_packet_header(&buffer, &datalen, &packet_size);
+        if(tag < 0)
+            goto exit;
+
+        datalen -= packet_size;
+
+        switch(tag) {
+        case PGP_TAG_PUBLIC_KEY:
+            ret = process_public_key_packet(&buffer, &datalen, pub);
+            if(ret < 0)
+                goto exit;
+            break;
+        case PGP_TAG_PUBLIC_SUBKEY:
+            ret = process_public_key_subkey_packet(&buffer, &datalen, pub);
+            if(ret < 0)
+                goto exit;
+            break;
+        case PGP_TAG_SIGNATURE:
+            ret = process_public_key_signature_packet(&buffer, &datalen, pub);
+            if(ret < 0)
+                goto exit;
+            break;
+        case PGP_TAG_USERID:
+            ret = process_public_key_uid_packet(&buffer, &datalen, pub);
+            if(ret < 0)
+                goto exit;
+            break;
+        }
+    }
+
+    ret = 0;
+
 exit:
     return ret;
 }

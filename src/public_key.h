@@ -35,6 +35,8 @@ void public_key_init(libsign_public_key *pub);
 void public_key_destroy(libsign_public_key *pub);
 
 int parse_public_key(libsign_public_key *pub, const char *filename);
+int parse_public_key_buffer(libsign_public_key *pub, const uint8_t *buffer,
+                            uint64_t datalen);
 
 int process_public_key_packet(const uint8_t **data, uint64_t *datalen,
                               libsign_public_key *ctx);

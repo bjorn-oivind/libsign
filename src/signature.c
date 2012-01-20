@@ -72,24 +72,7 @@ int parse_signature(libsign_signature *sig, const char *filename)
 
     p = buffer;
 
-    /* parse packet headers */
-    while(filesize) {
-        int tag = parse_packet_header(&p, &filesize, &packet_size);
-        if(tag < 0)
-            goto free_buffer;
-
-        filesize -= packet_size;
-
-        switch(tag) {
-        case PGP_TAG_SIGNATURE:
-            ret = process_signature_packet(&p, &packet_size, sig);
-            if(ret < 0)
-                goto free_buffer;
-            break;
-        }
-    }
-
-    ret = 0;
+    ret = parse_signature_buffer(sig, p, filesize);
 
 free_buffer:
     free(buffer);
@@ -97,6 +80,35 @@ close_fp:
     fclose(fp);
 close_fd:
     close(fd);
+exit:
+    return ret;
+}
+
+int parse_signature_buffer(libsign_signature *sig, const uint8_t *buffer,
+                           uint64_t datalen)
+{
+    int ret = -EINVAL;
+    uint64_t packet_size;
+
+    /* parse packet headers */
+    while(datalen) {
+        int tag = parse_packet_header(&buffer, &datalen, &packet_size);
+        if(tag < 0)
+            goto exit;
+
+        datalen -= packet_size;
+
+        switch(tag) {
+        case PGP_TAG_SIGNATURE:
+            ret = process_signature_packet(&buffer, &packet_size, sig);
+            if(ret < 0)
+                goto exit;
+            break;
+        }
+    }
+
+    ret = 0;
+
 exit:
     return ret;
 }
