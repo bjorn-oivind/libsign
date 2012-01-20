@@ -30,7 +30,7 @@ int parse_signature(libsign_signature *sig, const char *filename)
     int armored = 0, fd, ret = -EINVAL;
     FILE *fp;
     struct stat stbuf;
-    uint64_t filesize, packet_size;
+    uint64_t filesize;
     uint32_t filename_len;
     uint8_t *buffer;
     const uint8_t *p;
