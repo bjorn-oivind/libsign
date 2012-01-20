@@ -3,6 +3,7 @@
 
 #include <errno.h>
 #include <stdlib.h>
+#include <nettle/pgp.h>
 
 int decode_armor(uint8_t **data, uint64_t *datalen)
 {
@@ -74,7 +75,7 @@ int decode_armor(uint8_t **data, uint64_t *datalen)
 
     /* decode the data */
     base64_init_decodestate(&state);
-    plain_armor_len = base64_decode_block(armor_start, encoded_armor_len, pgp_plain, &state);
+    plain_armor_len = base64_decode_block((char*)armor_start, encoded_armor_len, (char*)pgp_plain, &state);
 
     /* give back the memory we don't need */
     pgp_plain = realloc(pgp_plain, plain_armor_len);
@@ -85,7 +86,7 @@ int decode_armor(uint8_t **data, uint64_t *datalen)
 
     /* decode the CRC */
     base64_init_decodestate(&state);
-    plain_crc_len = base64_decode_block(crc_start, encoded_crc_len, crc_plain, &state);
+    plain_crc_len = base64_decode_block((char*)crc_start, encoded_crc_len, (char*)crc_plain, &state);
 
     /* make sure the crc is big enough */
     if(plain_crc_len < 3)

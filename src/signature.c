@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -229,7 +230,7 @@ int decode_signature_armor(uint8_t **data, uint64_t *datalen)
     if(*datalen < 29)
         goto error;
 
-    if(strncmp(*data, "-----BEGIN PGP SIGNATURE-----", 29) != 0)
+    if(strncmp((char*)*data, "-----BEGIN PGP SIGNATURE-----", 29) != 0)
         goto error;
 
     return decode_armor(data, datalen);
