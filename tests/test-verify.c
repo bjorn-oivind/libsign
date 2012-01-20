@@ -12,11 +12,11 @@ int main(int argc, char **argv)
     signature_init(&sig);
     public_key_init(&pub);
 
-    ret = parse_public_key(&pub, "files/pubkey.asc");
+    ret = parse_public_key(&pub, KEYFILE);
     if(ret < 0)
         goto exit;
 
-    ret = parse_signature(&sig, "files/vmImage.asc");
+    ret = parse_signature(&sig, SIGFILE);
     if(ret < 0)
         goto destroy_pub;
 
