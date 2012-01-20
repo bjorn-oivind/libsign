@@ -18,14 +18,13 @@ int main(int argc, char **argv)
 
     ret = parse_signature(&sig, SIGFILE);
     if(ret < 0)
-        goto destroy_pub;
+        goto exit;
 
     ret = verify(&pub, &sig, "files/vmImage");
 
-destroy_sig:
-    signature_destroy(&sig);
-destroy_pub:
-    public_key_destroy(&pub);
 exit:
+    signature_destroy(&sig);
+    public_key_destroy(&pub);
+
     return ret;
 }
