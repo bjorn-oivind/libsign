@@ -45,4 +45,4 @@ install(FILES armor.h
                 sign.h
                 signature.h
                 verify.h
-        DESTINATION include)
+        DESTINATION include/libsign)
