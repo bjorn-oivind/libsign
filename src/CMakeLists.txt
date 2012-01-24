@@ -37,3 +37,12 @@ install(TARGETS sign
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib)
+
+# include files
+install(FILES armor.h
+                public_key.h
+                secret_key.h
+                sign.h
+                signature.h
+                verify.h
+        DESTINATION include)
