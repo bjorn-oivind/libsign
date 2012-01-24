@@ -30,9 +30,9 @@ int parse_signature(libsign_signature *sig, const char *filename)
     int armored = 0, fd, ret = -EINVAL;
     FILE *fp;
     struct stat stbuf;
-    uint64_t filesize;
+    uint64_t filesize, plain_len;
     uint32_t filename_len;
-    uint8_t *buffer;
+    uint8_t *buffer, *plaintext;
     const uint8_t *p;
 
     /* examine the filename to see if the file is armored */
@@ -66,13 +66,18 @@ int parse_signature(libsign_signature *sig, const char *filename)
 
     /* do we have to decode the armor? */
     if(armored) {
-        if(decode_signature_armor(&buffer, &filesize) != 0)
+        if(decode_signature_armor(buffer, filesize, &plaintext, &plain_len) != 0)
             goto free_buffer;
+        p = plaintext;
     }
-
-    p = buffer;
+    else
+        p = buffer;
 
     ret = parse_signature_buffer(sig, p, filesize);
+
+free_armor:
+    if(armored)
+        free(plaintext);
 
 free_buffer:
     free(buffer);
@@ -235,17 +240,17 @@ int process_signature_subpackets(const uint8_t **data, uint64_t *datalen,
     return 0;
 }
 
-int decode_signature_armor(uint8_t **data, uint64_t *datalen)
+int decode_signature_armor(uint8_t *data, uint64_t datalen, uint8_t **plain_out, uint64_t *plain_len)
 {
     /* (6.2) for signatures, the armor header line shall be
       "-----BEGIN PGP SIGNATURE-----" */
-    if(*datalen < 29)
+    if(datalen < 29)
         goto error;
 
-    if(strncmp((char*)*data, "-----BEGIN PGP SIGNATURE-----", 29) != 0)
+    if(strncmp((char*)data, "-----BEGIN PGP SIGNATURE-----", 29) != 0)
         goto error;
 
-    return decode_armor(data, datalen);
+    return decode_armor(data, datalen, plain_out, plain_len);
 
 error:
     return -EINVAL;

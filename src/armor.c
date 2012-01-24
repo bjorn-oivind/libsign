@@ -5,12 +5,12 @@
 #include <stdlib.h>
 #include <nettle/pgp.h>
 
-int decode_armor(uint8_t **data, uint64_t *datalen)
+int decode_armor(uint8_t *armor_in, uint64_t armor_len, uint8_t **plain_out, uint64_t *plain_len)
 {
     int i, ret = -EINVAL;
     const uint8_t *armor_start, *crc_start;
-    uint8_t *pgp_plain, *crc_plain;
-    uint32_t actual_crc24, expected_crc24, encoded_crc_len, plain_crc_len;
+    uint8_t *pgp_plain;
+    uint32_t actual_crc24, expected_crc24, crc_plain;
     uint64_t encoded_armor_len, plain_armor_len;
     base64_decodestate state;
 
@@ -24,53 +24,40 @@ int decode_armor(uint8_t **data, uint64_t *datalen)
 
     /* find the start of the armor */
     i = 1;
-    while(i++ < *datalen-1) {
-        if((*data)[i] == '\n' && (*data)[i-1] == '\n')
+    while(i++ < armor_len-1) {
+        if(armor_in[i] == '\n' && armor_in[i-1] == '\n')
             break;
     }
     /* did we find it? */
-    if(i == *datalen)
+    if(i == armor_len)
         goto exit;
 
-    armor_start = *data + i;
+    armor_start = armor_in + i;
 
     /* find the armor checksum and encrypted packet length */
-    i = *datalen;
+    i = armor_len;
     while(--i) {
-        if((*data)[i] == '=')
+        if(armor_in[i] == '=')
             break;
     }
     /* did we find it? */
     if(!i)
         goto exit;
 
-    crc_start = *data + i;
+    crc_start = armor_in + i;
     encoded_armor_len = crc_start - armor_start;
 
-    /* how long is the CRC? */
-    i = 0;
-    while(i++ < crc_start - *data) {
-        if(crc_start[i] == '\n')
-            break;
-    }
-    /* did we find it? */
-    if(i == crc_start - *data)
+    /* do we have enough data for the CRC too?
+       CRC is 5 characters long ('=' and CRC) - 3 octets - 24 bits */
+    if(encoded_armor_len + 5 > armor_len)
         goto exit;
 
-    encoded_crc_len = i;
-
-    /* allocate buffers for plaintexts (these are slightly bigger
+    /* allocate buffers for plaintext (this is slightly bigger
        than strictly necessary, but will be realloc'ed) */
     pgp_plain = malloc(encoded_armor_len);
     if(!pgp_plain) {
         ret = -ENOMEM;
         goto exit;
-    }
-
-    crc_plain = malloc(encoded_crc_len);
-    if(!crc_plain) {
-        ret = -ENOMEM;
-        goto free_pgp;
     }
 
     /* decode the data */
@@ -80,32 +67,27 @@ int decode_armor(uint8_t **data, uint64_t *datalen)
     /* give back the memory we don't need */
     pgp_plain = realloc(pgp_plain, plain_armor_len);
     if(!pgp_plain)
-        goto free_crc;
+        goto free_pgp;
 
     actual_crc24 = nettle_pgp_crc24(plain_armor_len, pgp_plain);
 
     /* decode the CRC */
     base64_init_decodestate(&state);
-    plain_crc_len = base64_decode_block((char*)crc_start, encoded_crc_len, (char*)crc_plain, &state);
+    /* ignore '='... */
+    base64_decode_block((char*)crc_start + 1, 4, (char*)&crc_plain, &state);
 
-    /* make sure the crc is big enough */
-    if(plain_crc_len < 3)
-        goto free_crc;
-
-    expected_crc24 = crc_plain[0] << 16 | crc_plain[1] << 8 | crc_plain[2];
+    expected_crc24 = (crc_plain & 0xff0000) >> 16 |
+                       (crc_plain & 0x0000ff) << 16 |
+                       (crc_plain & 0x00ff00);
 
     if(actual_crc24 != expected_crc24)
-        goto free_crc;
+        goto free_pgp;
 
-    free(*data);
-    free(crc_plain);
-    *data = pgp_plain;
-    *datalen = plain_armor_len;
+    *plain_out = pgp_plain;
+    *plain_len = plain_armor_len;
 
     return 0;
 
-free_crc:
-    free(crc_plain);
 free_pgp:
     free(pgp_plain);
 exit:

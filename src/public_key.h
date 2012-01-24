@@ -47,7 +47,7 @@ int process_public_key_signature_packet(const uint8_t **data, uint64_t *datalen,
 int process_public_key_subkey_packet(const uint8_t **data, uint64_t *datalen,
                                      libsign_public_key *ctx);
 
-int decode_public_key_armor(uint8_t **data, uint64_t *datalen);
+int decode_public_key_armor(uint8_t *data, uint64_t datalen, uint8_t **plain_out, uint64_t *plain_len);
 
 #ifdef __cplusplus
 }
