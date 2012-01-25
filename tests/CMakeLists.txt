@@ -80,9 +80,13 @@ file(COPY "files" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 add_test(NAME parse-binary-pubkey COMMAND test-parse-binary-pubkey)
 add_test(NAME parse-armor-pubkey COMMAND test-parse-armor-pubkey)
+add_test(NAME parse-binary-pubkey-buffer COMMAND test-parse-binary-pubkey-buffer)
+add_test(NAME parse-armor-pubkey-buffer COMMAND test-parse-armor-pubkey-buffer)
 
 add_test(NAME parse-binary-signature COMMAND test-parse-binary-signature)
 add_test(NAME parse-armor-signature COMMAND test-parse-armor-signature)
+add_test(NAME parse-binary-signature-buffer COMMAND test-parse-binary-signature-buffer)
+add_test(NAME parse-armor-signature-buffer COMMAND test-parse-armor-signature-buffer)
 
 add_test(NAME verify-binary-key-sig COMMAND test-verify-binary-key-sig)
 add_test(NAME verify-armor-key COMMAND test-verify-armor-key)
