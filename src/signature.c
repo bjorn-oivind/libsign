@@ -69,6 +69,7 @@ int parse_signature(libsign_signature *sig, const char *filename)
         if(decode_signature_armor(buffer, filesize, &plaintext, &plain_len) != 0)
             goto free_buffer;
         p = plaintext;
+        filesize = plain_len;
     }
     else
         p = buffer;

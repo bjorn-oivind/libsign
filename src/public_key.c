@@ -77,6 +77,7 @@ int parse_public_key(libsign_public_key *pub, const char *filename)
     if(armored) {
         if(decode_public_key_armor(buffer, filesize, &plaintext, &plain_len) != 0)
             goto free_buffer;
+        filesize = plain_len;
         p = plaintext;
     }
     else
