@@ -127,7 +127,7 @@ int parse_signature_armor_buffer(libsign_signature *sig, const uint8_t *buffer,
     uint64_t plain_len;
     const uint8_t *p;
 
-    ret = decode_public_key_armor(buffer, datalen, &plaintext, &plain_len);
+    ret = decode_signature_armor(buffer, datalen, &plaintext, &plain_len);
     if(ret < 0)
         goto exit;
 
