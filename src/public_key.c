@@ -143,6 +143,28 @@ exit:
     return ret;
 }
 
+int parse_public_key_armor_buffer(libsign_public_key *pub, const uint8_t *buffer,
+                                  uint64_t datalen)
+{
+    int ret = -EINVAL;
+    uint8_t *plaintext = NULL;
+    uint64_t plain_len;
+    const uint8_t *p;
+
+    ret = decode_public_key_armor(buffer, datalen, &plaintext, &plain_len);
+    if(ret < 0)
+        goto exit;
+
+    p = plaintext;
+
+    ret = parse_public_key_buffer(pub, plaintext, plain_len);
+
+exit:
+    free(plaintext);
+
+    return ret;
+}
+
 /* 5.5.2 */
 int process_public_key_packet(const uint8_t **data, uint64_t *datalen,
                               libsign_public_key *ctx)
@@ -241,7 +263,8 @@ int process_public_key_subkey_packet(const uint8_t **data, uint64_t *datalen,
     return 0;
 }
 
-int decode_public_key_armor(uint8_t *data, uint64_t datalen, uint8_t **plain_out, uint64_t *plain_len)
+int decode_public_key_armor(const uint8_t *data, uint64_t datalen, uint8_t **plain_out,
+                            uint64_t *plain_len)
 {
     /* (6.2) for public keys, the armor header line shall be
        "-----BEGIN PGP PUBLIC KEY BLOCK-----" */

@@ -119,6 +119,28 @@ exit:
     return ret;
 }
 
+int parse_signature_armor_buffer(libsign_signature *sig, const uint8_t *buffer,
+                                 uint64_t datalen)
+{
+    int ret = -EINVAL;
+    uint8_t *plaintext = NULL;
+    uint64_t plain_len;
+    const uint8_t *p;
+
+    ret = decode_public_key_armor(buffer, datalen, &plaintext, &plain_len);
+    if(ret < 0)
+        goto exit;
+
+    p = plaintext;
+
+    ret = parse_signature_buffer(sig, plaintext, plain_len);
+
+exit:
+    free(plaintext);
+
+    return ret;
+}
+
 /* 5.2 */
 int process_signature_packet(const uint8_t **data, uint64_t *datalen,
                              libsign_signature *ctx)
@@ -241,7 +263,8 @@ int process_signature_subpackets(const uint8_t **data, uint64_t *datalen,
     return 0;
 }
 
-int decode_signature_armor(uint8_t *data, uint64_t datalen, uint8_t **plain_out, uint64_t *plain_len)
+int decode_signature_armor(const uint8_t *data, uint64_t datalen, uint8_t **plain_out,
+                           uint64_t *plain_len)
 {
     /* (6.2) for signatures, the armor header line shall be
       "-----BEGIN PGP SIGNATURE-----" */

@@ -36,13 +36,16 @@ void signature_destroy(libsign_signature *sig);
 int parse_signature(libsign_signature *sig, const char *filename);
 int parse_signature_buffer(libsign_signature *sig, const uint8_t *buffer,
                            uint64_t datalen);
+int parse_signature_armor_buffer(libsign_signature *sig, const uint8_t *buffer,
+                                 uint64_t datalen);
 
 int process_signature_packet(const uint8_t **data, uint64_t *datalen,
                              libsign_signature *ctx);
 int process_signature_subpackets(const uint8_t **data, uint64_t *datalen,
                                  int subdatalen, libsign_signature *ctx);
 
-int decode_signature_armor(uint8_t *data, uint64_t datalen, uint8_t **plain_out, uint64_t *plain_len);
+int decode_signature_armor(const uint8_t *data, uint64_t datalen, uint8_t **plain_out,
+                           uint64_t *plain_len);
 
 #ifdef __cplusplus
 }

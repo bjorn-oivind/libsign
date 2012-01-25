@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <nettle/pgp.h>
 
-int decode_armor(uint8_t *armor_in, uint64_t armor_len, uint8_t **plain_out, uint64_t *plain_len)
+int decode_armor(const uint8_t *armor_in, uint64_t armor_len, uint8_t **plain_out,
+                 uint64_t *plain_len)
 {
     int i, ret = -EINVAL;
     const uint8_t *armor_start, *crc_start;
