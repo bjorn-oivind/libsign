@@ -13,6 +13,18 @@ target_link_libraries(test-parse-armor-pubkey sign)
 set_target_properties(test-parse-armor-pubkey PROPERTIES
     COMPILE_DEFINITIONS KEYFILE="files/pubkey.asc")
 
+add_executable(test-parse-binary-pubkey-buffer test-parse-pubkey-buffer.c)
+add_dependencies(test-parse-binary-pubkey-buffer sign)
+target_link_libraries(test-parse-binary-pubkey-buffer sign)
+set_target_properties(test-parse-binary-pubkey-buffer PROPERTIES
+    COMPILE_DEFINITIONS KEYFILE="files/pubkey.key")
+
+add_executable(test-parse-armor-pubkey-buffer test-parse-pubkey-buffer.c)
+add_dependencies(test-parse-armor-pubkey-buffer sign)
+target_link_libraries(test-parse-armor-pubkey-buffer sign)
+set_target_properties(test-parse-armor-pubkey-buffer PROPERTIES
+    COMPILE_DEFINITIONS KEYFILE="files/pubkey.asc")
+
 # signature tests
 add_executable(test-parse-binary-signature test-parse-signature.c)
 add_dependencies(test-parse-binary-signature sign)
@@ -24,6 +36,18 @@ add_executable(test-parse-armor-signature test-parse-signature.c)
 add_dependencies(test-parse-armor-signature sign)
 target_link_libraries(test-parse-armor-signature sign)
 set_target_properties(test-parse-armor-signature PROPERTIES
+    COMPILE_DEFINITIONS SIGFILE="files/vmImage.asc")
+
+add_executable(test-parse-binary-signature-buffer test-parse-signature-buffer.c)
+add_dependencies(test-parse-binary-signature-buffer sign)
+target_link_libraries(test-parse-binary-signature-buffer sign)
+set_target_properties(test-parse-binary-signature-buffer PROPERTIES
+    COMPILE_DEFINITIONS SIGFILE="files/vmImage.sig")
+
+add_executable(test-parse-armor-signature-buffer test-parse-signature-buffer.c)
+add_dependencies(test-parse-armor-signature-buffer sign)
+target_link_libraries(test-parse-armor-signature-buffer sign)
+set_target_properties(test-parse-armor-signature-buffer PROPERTIES
     COMPILE_DEFINITIONS SIGFILE="files/vmImage.asc")
 
 # verify tests
