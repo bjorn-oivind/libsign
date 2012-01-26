@@ -32,7 +32,7 @@ int verify(libsign_public_key *public_key, libsign_signature *signature, const c
 }
 
 int verify_buffer(libsign_public_key *public_key, libsign_signature *signature,
-                  uint8_t *data, uint64_t datalen)
+                  const uint8_t *data, uint64_t datalen)
 {
     /* TODO: check that the key id matches here */
     switch(public_key->pk_algo) {

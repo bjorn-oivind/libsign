@@ -10,7 +10,7 @@ extern "C" {
 
 int verify(libsign_public_key *public_key, libsign_signature *signature, const char *filename);
 int verify_buffer(libsign_public_key *public_key, libsign_signature *signature,
-                  uint8_t *data, uint64_t datalen);
+                  const uint8_t *data, uint64_t datalen);
 
 int rsa_sha1_verify_file(libsign_public_key *pub_ctx, libsign_signature *sig_ctx,
                          const char *filename);
