@@ -31,6 +31,26 @@ int verify(libsign_public_key *public_key, libsign_signature *signature, const c
     }
 }
 
+int verify_buffer(libsign_public_key *public_key, libsign_signature *signature,
+                  uint8_t *data, uint64_t datalen)
+{
+    /* TODO: check that the key id matches here */
+    switch(public_key->pk_algo) {
+    case PGP_RSA:
+        switch(signature->hash_algo) {
+        case PGP_SHA1:
+            return rsa_sha1_verify_data(public_key, signature, data, datalen);
+            break;
+        default:
+            return -ENOTSUP;
+            break;
+        }
+    default:
+        return -ENOTSUP;
+        break;
+    }
+}
+
 int rsa_sha1_verify_file(libsign_public_key *pub_ctx, libsign_signature *sig_ctx,
                          const char *filename)
 {
