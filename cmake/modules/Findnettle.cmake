@@ -16,10 +16,6 @@ if (NETTLE_INCLUDE_DIR AND NETTLE_LIBRARIES AND NETTLE_LIBRARY_DIR)
 else (NETTLE_INCLUDE_DIR AND NETTLE_LIBRARIES AND NETTLE_LIBRARY_DIR)
 
   if (NOT WIN32)
-    # use pkg-config to get the values of NETTLE_INCLUDE_DIR
-    # and NETTLE_LIBRARY_DIR to add as hints to the find commands.
-    include (FindPkgConfig)
-    pkg_check_modules (NETTLE REQUIRED nettle)
     set(NETTLE_LIBRARY_DIR "/usr/lib")
     set(NETTLE_INCLUDE_DIR "/usr/include/")
   else(NOT WIN32)
