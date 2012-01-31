@@ -13,6 +13,17 @@ set(LIBRARY_OUTPUT_PATH ${libsign_BINARY_DIR})
 include(GetGitRevisionDescription)
 git_describe(_revision)
 
+# just until this is implemented in CMake...
+if(${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
+	set(CMAKE_COMPILER_IS_CLANG true)
+endif(${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
+
+# we like warnings.
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
+	add_definitions("-Wall -Wextra")
+endif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
+
+
 include_directories(src)
 
 add_subdirectory(src)
