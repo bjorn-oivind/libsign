@@ -7,8 +7,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include <nettle/pgp.h>
-#include <nettle/bignum.h>
+#include <pgp.h>
+#include <bignum.h>
 
 #ifdef __cplusplus
 extern "C" {

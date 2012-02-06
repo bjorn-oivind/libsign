@@ -5,11 +5,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <nettle/sha.h>
-#include <nettle/rsa.h>
+#include <sha.h>
+#include <rsa.h>
+
+#ifndef _MSC_VER
+#include <unistd.h>
+#endif
 
 int verify(libsign_public_key *public_key, libsign_signature *signature, const char *filename)
 {
