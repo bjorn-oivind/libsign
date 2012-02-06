@@ -35,7 +35,7 @@ int verify(libsign_public_key *public_key, libsign_signature *signature, const c
 }
 
 int verify_buffer(libsign_public_key *public_key, libsign_signature *signature,
-                  const uint8_t *data, uint64_t datalen)
+                  const uint8_t *data, uint32_t datalen)
 {
     /* TODO: check that the key id matches here */
     switch(public_key->pk_algo) {
@@ -77,7 +77,7 @@ int rsa_sha1_verify_fd(libsign_public_key *pub_ctx, libsign_signature *sig_ctx,
     /* read and verify the contents of file given by fd */
     int ret = -EINVAL;
     struct stat stbuf;
-    uint64_t filesize;
+    uint32_t filesize;
     uint8_t *buffer;
     FILE *fp;
 
@@ -111,7 +111,7 @@ exit:
 
 /* 5.2.4 */
 int rsa_sha1_verify_data(libsign_public_key *pub_ctx, libsign_signature *sig_ctx,
-                          const uint8_t *data, uint64_t datalen)
+                          const uint8_t *data, uint32_t datalen)
 {
     int ret = -EINVAL;
     struct sha1_ctx hash;

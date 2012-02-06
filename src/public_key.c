@@ -42,8 +42,7 @@ int parse_public_key(libsign_public_key *pub, const char *filename)
     int armored = 0, fd, ret = -EINVAL;
     FILE *fp;
     struct stat stbuf;
-    uint64_t filesize, plain_len;
-    uint32_t filename_len;
+    uint32_t filesize, filename_len, plain_len;
     uint8_t *buffer, *plaintext;
     const uint8_t *p;
 
@@ -88,7 +87,6 @@ int parse_public_key(libsign_public_key *pub, const char *filename)
 
     ret = parse_public_key_buffer(pub, p, filesize);
 
-free_armor:
     if(armored)
         free(plaintext);
 
@@ -103,10 +101,10 @@ exit:
 }
 
 int parse_public_key_buffer(libsign_public_key *pub, const uint8_t *buffer,
-                            uint64_t datalen)
+                            uint32_t datalen)
 {
     int ret = -EINVAL;
-    uint64_t packet_size;
+    uint32_t packet_size;
 
     /* parse packet headers */
     while(datalen) {
@@ -147,18 +145,15 @@ exit:
 }
 
 int parse_public_key_armor_buffer(libsign_public_key *pub, const uint8_t *buffer,
-                                  uint64_t datalen)
+                                  uint32_t datalen)
 {
     int ret = -EINVAL;
     uint8_t *plaintext = NULL;
-    uint64_t plain_len;
-    const uint8_t *p;
+    uint32_t plain_len;
 
     ret = decode_public_key_armor(buffer, datalen, &plaintext, &plain_len);
     if(ret < 0)
         goto exit;
-
-    p = plaintext;
 
     ret = parse_public_key_buffer(pub, plaintext, plain_len);
 
@@ -169,12 +164,12 @@ exit:
 }
 
 /* 5.5.2 */
-int process_public_key_packet(const uint8_t **data, uint64_t *datalen,
+int process_public_key_packet(const uint8_t **data, uint32_t *datalen,
                               libsign_public_key *ctx)
 {
     int ret = -EINVAL;
     const uint8_t *p = *data;
-    uint64_t tmplen = *datalen;
+    uint32_t tmplen = *datalen;
 
     /* public key packet must be at least 8 bytes:
        version, creation time, pk algorithm, at least one MPI */
@@ -220,12 +215,12 @@ exit:
     return ret;
 }
 
-int process_public_key_uid_packet(const uint8_t **data, uint64_t *datalen,
+int process_public_key_uid_packet(const uint8_t **data, uint32_t *datalen,
                                   libsign_public_key *ctx)
 {
     const uint8_t *p = *data;
 
-    int i, index = ctx->num_userids;
+    uint32_t i, index = ctx->num_userids;
 
     ctx->num_userids++;
     ctx->userids = realloc(ctx->userids, ctx->num_userids * sizeof(libsign_userid));
@@ -246,28 +241,30 @@ int process_public_key_uid_packet(const uint8_t **data, uint64_t *datalen,
     return 0;
 }
 
-int process_public_key_signature_packet(const uint8_t **data, uint64_t *datalen,
+int process_public_key_signature_packet(const uint8_t **data, uint32_t *datalen,
                                         libsign_public_key *ctx)
 {
     /* TODO: parse this properly */
+    (void)ctx;
     *data += *datalen;
     *datalen = 0;
 
     return 0;
 }
 
-int process_public_key_subkey_packet(const uint8_t **data, uint64_t *datalen,
+int process_public_key_subkey_packet(const uint8_t **data, uint32_t *datalen,
                                      libsign_public_key *ctx)
 {
     /* TODO: parse this properly */
+    (void)ctx;
     *data += *datalen;
     *datalen = 0;
 
     return 0;
 }
 
-int decode_public_key_armor(const uint8_t *data, uint64_t datalen, uint8_t **plain_out,
-                            uint64_t *plain_len)
+int decode_public_key_armor(const uint8_t *data, uint32_t datalen, uint8_t **plain_out,
+                            uint32_t *plain_len)
 {
     /* (6.2) for public keys, the armor header line shall be
        "-----BEGIN PGP PUBLIC KEY BLOCK-----" */

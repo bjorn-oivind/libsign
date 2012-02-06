@@ -13,6 +13,9 @@
 
 int main(int argc, char **argv)
 {
+    (void)argc;
+    (void)argv;
+
     int ret, fd, armored = 0;
     FILE *fp;
     struct stat stbuf;

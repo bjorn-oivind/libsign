@@ -5,14 +5,14 @@
 #include <stdlib.h>
 #include <pgp.h>
 
-int decode_armor(const uint8_t *armor_in, uint64_t armor_len, uint8_t **plain_out,
-                 uint64_t *plain_len)
+int decode_armor(const uint8_t *armor_in, uint32_t armor_len, uint8_t **plain_out,
+                 uint32_t *plain_len)
 {
     int ret = -EINVAL;
     const uint8_t *armor_start, *crc_start;
     uint8_t *pgp_plain;
     uint32_t actual_crc24, expected_crc24, crc_plain;
-    uint64_t i, encoded_armor_len, plain_armor_len;
+    uint32_t i, encoded_armor_len, plain_armor_len;
     base64_decodestate state;
 
     /* (6.2) ASCII armor shall be the concatenation of the following data:

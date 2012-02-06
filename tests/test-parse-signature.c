@@ -2,6 +2,9 @@
 
 int main(int argc, char **argv)
 {
+    (void)argc;
+    (void)argv;
+
     int ret;
 
     libsign_signature sig;

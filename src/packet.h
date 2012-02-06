@@ -14,7 +14,7 @@
 extern "C" {
 #endif
 
-int parse_packet_header(const uint8_t **data, uint64_t *datalen, uint64_t *packet_size);
+int parse_packet_header(const uint8_t **data, uint32_t *datalen, uint32_t *packet_size);
 
 #ifdef __cplusplus
 }

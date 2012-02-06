@@ -33,8 +33,7 @@ int parse_signature(libsign_signature *sig, const char *filename)
     int armored = 0, fd, ret = -EINVAL;
     FILE *fp;
     struct stat stbuf;
-    uint64_t filesize, plain_len;
-    uint32_t filename_len;
+    uint32_t filesize, filename_len, plain_len;
     uint8_t *buffer, *plaintext;
     const uint8_t *p;
 
@@ -79,7 +78,6 @@ int parse_signature(libsign_signature *sig, const char *filename)
 
     ret = parse_signature_buffer(sig, p, filesize);
 
-free_armor:
     if(armored)
         free(plaintext);
 
@@ -94,10 +92,10 @@ exit:
 }
 
 int parse_signature_buffer(libsign_signature *sig, const uint8_t *buffer,
-                           uint64_t datalen)
+                           uint32_t datalen)
 {
     int ret = -EINVAL;
-    uint64_t packet_size;
+    uint32_t packet_size;
 
     /* parse packet headers */
     while(datalen) {
@@ -123,18 +121,15 @@ exit:
 }
 
 int parse_signature_armor_buffer(libsign_signature *sig, const uint8_t *buffer,
-                                 uint64_t datalen)
+                                 uint32_t datalen)
 {
     int ret = -EINVAL;
     uint8_t *plaintext = NULL;
-    uint64_t plain_len;
-    const uint8_t *p;
+    uint32_t plain_len;
 
     ret = decode_signature_armor(buffer, datalen, &plaintext, &plain_len);
     if(ret < 0)
         goto exit;
-
-    p = plaintext;
 
     ret = parse_signature_buffer(sig, plaintext, plain_len);
 
@@ -145,13 +140,12 @@ exit:
 }
 
 /* 5.2 */
-int process_signature_packet(const uint8_t **data, uint64_t *datalen,
+int process_signature_packet(const uint8_t **data, uint32_t *datalen,
                              libsign_signature *ctx)
 {
-    int ret = -EINVAL, subdatalen;
+    int ret = -EINVAL;
     const uint8_t *p = *data;
-    uint64_t tmplen = *datalen;
-    uint32_t hashed_len;
+    uint32_t subdatalen, hashed_len, tmplen = *datalen;
     uint8_t *hashed_data;
     const uint8_t *hashed_data_start;
 
@@ -257,17 +251,18 @@ free_hashed_data:
     return ret;
 }
 
-int process_signature_subpackets(const uint8_t **data, uint64_t *datalen,
+int process_signature_subpackets(const uint8_t **data, uint32_t *datalen,
                                  int subdatalen, libsign_signature *ctx)
 {
     /* TODO: parse subpackets. Length has already been checked. */
+    (void)ctx;
     *data += subdatalen;
     *datalen -= subdatalen;
     return 0;
 }
 
-int decode_signature_armor(const uint8_t *data, uint64_t datalen, uint8_t **plain_out,
-                           uint64_t *plain_len)
+int decode_signature_armor(const uint8_t *data, uint32_t datalen, uint8_t **plain_out,
+                           uint32_t *plain_len)
 {
     /* (6.2) for signatures, the armor header line shall be
       "-----BEGIN PGP SIGNATURE-----" */

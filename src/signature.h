@@ -15,7 +15,7 @@ enum pgp_sig_version {
     PGP_SIG_VER4    = 4
 };
 
-struct libsign_signature
+typedef struct libsign_signature
 {
     enum pgp_sig_version version;
     enum pgp_signature_type type;
@@ -28,24 +28,24 @@ struct libsign_signature
     uint16_t short_hash;
 
     mpz_t s;
-} typedef libsign_signature;
+} libsign_signature;
 
 void signature_init(libsign_signature *sig);
 void signature_destroy(libsign_signature *sig);
 
 int parse_signature(libsign_signature *sig, const char *filename);
 int parse_signature_buffer(libsign_signature *sig, const uint8_t *buffer,
-                           uint64_t datalen);
+                           uint32_t datalen);
 int parse_signature_armor_buffer(libsign_signature *sig, const uint8_t *buffer,
-                                 uint64_t datalen);
+                                 uint32_t datalen);
 
-int process_signature_packet(const uint8_t **data, uint64_t *datalen,
+int process_signature_packet(const uint8_t **data, uint32_t *datalen,
                              libsign_signature *ctx);
-int process_signature_subpackets(const uint8_t **data, uint64_t *datalen,
+int process_signature_subpackets(const uint8_t **data, uint32_t *datalen,
                                  int subdatalen, libsign_signature *ctx);
 
-int decode_signature_armor(const uint8_t *data, uint64_t datalen, uint8_t **plain_out,
-                           uint64_t *plain_len);
+int decode_signature_armor(const uint8_t *data, uint32_t datalen, uint8_t **plain_out,
+                           uint32_t *plain_len);
 
 #ifdef __cplusplus
 }

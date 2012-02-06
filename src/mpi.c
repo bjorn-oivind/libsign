@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 /* 3.2 */
-int mpi_to_mpz(const uint8_t **data, uint64_t *datalen, mpz_t *i)
+int mpi_to_mpz(const uint8_t **data, uint32_t *datalen, mpz_t *i)
 {
     /* the MPI used in PGP shall:
         1) start with a two octet big-endian number denoting
@@ -15,8 +15,7 @@ int mpi_to_mpz(const uint8_t **data, uint64_t *datalen, mpz_t *i)
            shall be ((MPI.length + 7) / 8) + 2. */
     int ret = 0;
     const uint8_t *p;
-    uint32_t bitlen, bytelen;
-    uint64_t tmplen = *datalen;
+    uint32_t bitlen, bytelen, tmplen = *datalen;
     /* we must have at least two bytes to read. */
     if(tmplen < 2) {
         fprintf(stderr, "Invalid MPI found.\n");

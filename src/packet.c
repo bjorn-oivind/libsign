@@ -15,12 +15,12 @@
 #endif
 
 /* 4.2 */
-int parse_packet_header(const uint8_t **data, uint64_t *datalen, uint64_t *packet_size)
+int parse_packet_header(const uint8_t **data, uint32_t *datalen, uint32_t *packet_size)
 {
     int ret = -EINVAL;
     uint8_t tag;
     const uint8_t *p = *data;
-    uint64_t newlen = *datalen;
+    uint32_t newlen = *datalen;
     /* datalen must be at least two bytes */
     if(*datalen < 2)
         goto exit;
@@ -35,7 +35,7 @@ int parse_packet_header(const uint8_t **data, uint64_t *datalen, uint64_t *packe
     /* is it a new format header? (4.2.2) */
     if(tag & 0x40) {
         tag &= ~0x40;
-        if(*p >= 0x00 && *p <= 0xbf) {
+        if(*p <= 0xbf) {
             /* one byte length (4.2.2.1) */
             *packet_size = *p++;
         }
