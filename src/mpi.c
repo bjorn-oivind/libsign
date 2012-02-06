@@ -14,6 +14,8 @@ int mpi_to_mpz(const uint8_t **data, uint64_t *datalen, mpz_t *i)
         3) the total size of the MPI (bitlength included) in bytes
            shall be ((MPI.length + 7) / 8) + 2. */
     int ret = 0;
+    const uint8_t *p;
+    uint32_t bitlen, bytelen;
     uint64_t tmplen = *datalen;
     /* we must have at least two bytes to read. */
     if(tmplen < 2) {
@@ -22,12 +24,12 @@ int mpi_to_mpz(const uint8_t **data, uint64_t *datalen, mpz_t *i)
         goto exit;
     }
 
-    const uint8_t *p = *data;
-    uint32_t bitlen = (*p++ << 8);
+    p = *data;
+    bitlen = (*p++ << 8);
     bitlen |= *p++;
     tmplen -= 2;
     /* don't include the header. */
-    uint32_t bytelen = (bitlen + 7) / 8;
+    bytelen = (bitlen + 7) / 8;
 
     /* do we have enough data to read? */
     if(tmplen < bytelen) {
