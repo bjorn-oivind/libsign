@@ -17,7 +17,7 @@ else (NETTLE_INCLUDE_DIR AND NETTLE_LIBRARIES AND NETTLE_LIBRARY_DIR)
 
   if (NOT WIN32)
     set(NETTLE_LIBRARY_DIR "/usr/lib")
-    set(NETTLE_INCLUDE_DIR "/usr/include/")
+    set(NETTLE_INCLUDE_DIR "/usr/include/nettle")
   else(NOT WIN32)
     file(TO_CMAKE_PATH "$ENV{PROGRAMFILES}/nettle/lib" NETTLE_LIBRARY_DIR)
     file(TO_CMAKE_PATH "$ENV{PROGRAMFILES}/nettle/include" NETTLE_INCLUDE_DIR)
