@@ -3,7 +3,7 @@
 
 #include <errno.h>
 #include <stdlib.h>
-#include <nettle/pgp.h>
+#include <pgp.h>
 
 int decode_armor(const uint8_t *armor_in, uint64_t armor_len, uint8_t **plain_out,
                  uint64_t *plain_len)

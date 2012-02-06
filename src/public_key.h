@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include <nettle/pgp.h>
+#include <pgp.h>
 
 #ifdef __cplusplus
 extern "C" {

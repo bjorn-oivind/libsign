@@ -1,7 +1,7 @@
 #ifndef __LIBSIGN_MPI_H
 #define __LIBSIGN_MPI_H
 
-#include <nettle/bignum.h>
+#include <bignum.h>
 
 #ifdef __cplusplus
 extern "C" {
