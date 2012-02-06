@@ -31,9 +31,7 @@ if(NOT NETTLE_FOUND)
 	message(FATAL_ERROR "Nettle not found.")
 endif(NOT NETTLE_FOUND)
 
-include_directories(${NETTLE_INCLUDE_DIR})
-
-include_directories(src)
+include_directories(${NETTLE_INCLUDE_DIR} src)
 
 add_subdirectory(src)
 add_subdirectory(tests)
