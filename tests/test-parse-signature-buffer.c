@@ -11,11 +11,8 @@
 #include <unistd.h>
 #endif
 
-int main(int argc, char **argv)
+int main()
 {
-    (void)argc;
-    (void)argv;
-
     int ret, fd, armored = 0;
     FILE *fp;
     struct stat stbuf;

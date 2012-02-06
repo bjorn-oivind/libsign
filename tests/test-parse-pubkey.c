@@ -1,10 +1,7 @@
 #include "public_key.h"
 
-int main(int argc, char **argv)
+int main()
 {
-    (void)argc;
-    (void)argv;
-
     int ret;
 
     libsign_public_key pub;
