@@ -6,22 +6,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <nettle/pgp.h>
+#include <pgp.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+
+#ifndef _MSC_VER
+#include <unistd.h>
+#endif
 
 /* 4.2 */
 int parse_packet_header(const uint8_t **data, uint64_t *datalen, uint64_t *packet_size)
 {
     int ret = -EINVAL;
+    uint8_t tag;
     const uint8_t *p = *data;
-    int newlen = *datalen;
+    uint64_t newlen = *datalen;
     /* datalen must be at least two bytes */
     if(*datalen < 2)
         goto exit;
 
-    uint8_t tag = *p++;
+    tag = *p++;
 
     if(!(tag & 0x80))
         goto exit;
@@ -31,25 +35,22 @@ int parse_packet_header(const uint8_t **data, uint64_t *datalen, uint64_t *packe
     /* is it a new format header? (4.2.2) */
     if(tag & 0x40) {
         tag &= ~0x40;
-        switch(*p) {
-        case 0x00 ... 0xbf:
+        if(*p >= 0x00 && *p <= 0xbf) {
             /* one byte length (4.2.2.1) */
             *packet_size = *p++;
-            break;
-        case 0xc0 ... 0xdf:
+        }
+        else if(*p >= 0xc0 && *p <= 0xdf) {
             /* two byte length (4.2.2.2) */
             /* datalen must be at least three bytes */
             if(*datalen < 3)
                 goto exit;
-
             *packet_size = (*p++ - 192) << 8;
             *packet_size += *p++ + 192;
-            break;
-        default:
+        }
+        else {
             /* should probably support more lengths... */
             ret = -ENOTSUP;
             goto exit;
-            break;
         }
     }
     /* old format packet length (4.2.1) */
