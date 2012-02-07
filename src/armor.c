@@ -24,13 +24,16 @@ int decode_armor(const uint8_t *armor_in, uint32_t armor_len, uint8_t **plain_ou
       - the armor tail */
 
     /* find the start of the armor */
-    i = 3;
+    i = 1;
     while(i++ < armor_len-1) {
         /* test for both unix style endings and windows style */
-        if((armor_in[i-3] == '\n' && armor_in[i-2] == '\n') ||
-           (armor_in[i-3] == '\r' && armor_in[i-2] == '\n' && 
-            armor_in[i-1] == '\r' && armor_in[i] == '\n'))
+        if(armor_in[i-1] == '\n' && armor_in[i] == '\n')
             break;
+        else if(i >= 3) {
+            if((armor_in[i-3] == '\r' && armor_in[i-2] == '\n' &&
+                armor_in[i-1] == '\r' && armor_in[i] == '\n'))
+                break;
+        }
     }
     /* did we find it? */
     if(i == armor_len)
