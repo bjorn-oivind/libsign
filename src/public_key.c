@@ -13,6 +13,7 @@
 
 #ifndef _MSC_VER
 #include <unistd.h>
+#define O_BINARY 0
 #endif
 
 void public_key_init(libsign_public_key *pub)

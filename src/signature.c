@@ -13,6 +13,7 @@
 
 #ifndef _MSC_VER
 #include <unistd.h>
+#define O_BINARY 0
 #endif
 
 void signature_init(libsign_signature *sig)

@@ -12,6 +12,7 @@
 
 #ifndef _MSC_VER
 #include <unistd.h>
+#define O_BINARY 0
 #endif
 
 int verify(libsign_public_key *public_key, libsign_signature *signature, const char *filename)
