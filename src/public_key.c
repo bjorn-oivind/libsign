@@ -40,7 +40,6 @@ int parse_public_key(libsign_public_key *pub, const char *filename)
 {
     /* open the file pointed to by filename and read contents into memory */
     int armored = 0, fd, ret = -EINVAL;
-    FILE *fp;
     struct stat stbuf;
     uint32_t filesize, filename_len, plain_len;
     uint8_t *buffer, *plaintext;
@@ -53,26 +52,22 @@ int parse_public_key(libsign_public_key *pub, const char *filename)
     if(filename_len > 4 && strncmp(filename + (filename_len-4), ".asc", 4) == 0)
         armored = 1;
 
-    fd = open(filename, O_RDONLY);
+    fd = open(filename, O_RDONLY | O_BINARY);
     if(fd == -1) {
         goto exit;
     }
 
-    fp = fdopen(fd, "rb");
-    if(!fp)
-        goto close_fd;
-
     /* find size of file */
     if(fstat(fd, &stbuf) == -1)
-        goto close_fp;
+        goto close_fd;
 
     filesize = stbuf.st_size;
     buffer = malloc(filesize);
     if(!buffer)
-        goto close_fp;
+        goto close_fd;
 
     /* read file into memory */
-    if(fread((uint8_t*)buffer, filesize, 1, fp) == 0)
+    if(read(fd, buffer, filesize) != filesize)
         goto free_buffer;
 
     /* do we have to decode the armor? */
@@ -92,8 +87,6 @@ int parse_public_key(libsign_public_key *pub, const char *filename)
 
 free_buffer:
     free(buffer);
-close_fp:
-    fclose(fp);
 close_fd:
     close(fd);
 exit:

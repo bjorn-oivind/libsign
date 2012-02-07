@@ -59,7 +59,7 @@ int rsa_sha1_verify_file(libsign_public_key *pub_ctx, libsign_signature *sig_ctx
 {
     /* open an fd and send the result to rsa_sha1_verify_fd. */
     int ret;
-    int fd = open(filename, O_RDONLY);
+    int fd = open(filename, O_RDONLY | O_BINARY);
     if(fd == -1) {
         return -EINVAL;
     }
@@ -72,39 +72,32 @@ int rsa_sha1_verify_file(libsign_public_key *pub_ctx, libsign_signature *sig_ctx
 }
 
 int rsa_sha1_verify_fd(libsign_public_key *pub_ctx, libsign_signature *sig_ctx,
-                          int fd)
+                       int fd)
 {
     /* read and verify the contents of file given by fd */
     int ret = -EINVAL;
     struct stat stbuf;
     uint32_t filesize;
     uint8_t *buffer;
-    FILE *fp;
-
-    fp = fdopen(fd, "rb");
-    if(!fp)
-        goto exit;
 
     /* find size of file */
     if(fstat(fd, &stbuf) == -1)
-        goto close_fp;
+        goto exit;
 
     filesize = stbuf.st_size;
     buffer = malloc(filesize);
     if(!buffer) {
         ret = -ENOMEM;
-        goto close_fp;
+        goto exit;
     }
 
-    if(fread(buffer, filesize, 1, fp) == 0)
+    if(read(fd, buffer, filesize) != filesize)
         goto free_buffer;
 
     ret = rsa_sha1_verify_data(pub_ctx, sig_ctx, (const uint8_t*)buffer, filesize);
 
 free_buffer:
     free(buffer);
-close_fp:
-    fclose(fp);
 exit:
     return ret;
 }
