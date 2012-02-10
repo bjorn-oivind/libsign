@@ -110,22 +110,22 @@ int parse_public_key_buffer(libsign_public_key *pub, const uint8_t *buffer,
 
         switch(tag) {
         case PGP_TAG_PUBLIC_KEY:
-            ret = process_public_key_packet(&buffer, &datalen, pub);
+            ret = process_public_key_packet(&buffer, &packet_size, pub);
             if(ret < 0)
                 goto exit;
             break;
         case PGP_TAG_PUBLIC_SUBKEY:
-            ret = process_public_key_subkey_packet(&buffer, &datalen, pub);
+            ret = process_public_key_subkey_packet(&buffer, &packet_size, pub);
             if(ret < 0)
                 goto exit;
             break;
         case PGP_TAG_SIGNATURE:
-            ret = process_public_key_signature_packet(&buffer, &datalen, pub);
+            ret = process_public_key_signature_packet(&buffer, &packet_size, pub);
             if(ret < 0)
                 goto exit;
             break;
         case PGP_TAG_USERID:
-            ret = process_public_key_uid_packet(&buffer, &datalen, pub);
+            ret = process_public_key_uid_packet(&buffer, &packet_size, pub);
             if(ret < 0)
                 goto exit;
             break;
