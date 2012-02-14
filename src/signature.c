@@ -221,11 +221,9 @@ int process_signature_packet(const uint8_t **data, uint32_t *datalen,
     switch(ctx->pk_algo) {
     case PGP_RSA:
         /* RSA signature value m ** d mod n. */
-        mpz_init(ctx->s);
-        if(mpi_to_mpz(&p, &tmplen, &ctx->s) != 0) {
-            mpz_clear(ctx->s);
+        if(mpi_to_mpz(&p, &tmplen, &ctx->s) != 0)
             goto free_hashed_data;
-        }
+
         break;
     default:
         ret = -ENOTSUP;
