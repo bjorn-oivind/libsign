@@ -1,7 +1,6 @@
 #include "mpi.h"
 
 #include <errno.h>
-#include <stdio.h>
 
 /* 3.2 */
 int mpi_to_mpz(const uint8_t **data, uint32_t *datalen, mpz_t *i)
@@ -18,7 +17,6 @@ int mpi_to_mpz(const uint8_t **data, uint32_t *datalen, mpz_t *i)
     uint32_t bitlen, bytelen, tmplen = *datalen;
     /* we must have at least two bytes to read. */
     if(tmplen < 2) {
-        fprintf(stderr, "Invalid MPI found.\n");
         ret = -EINVAL;
         goto exit;
     }
@@ -32,7 +30,6 @@ int mpi_to_mpz(const uint8_t **data, uint32_t *datalen, mpz_t *i)
 
     /* do we have enough data to read? */
     if(tmplen < bytelen) {
-        fprintf(stderr, "Invalid MPI length.\n");
         ret = -EINVAL;
         goto exit;
     }
