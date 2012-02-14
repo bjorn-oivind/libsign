@@ -1,14 +1,7 @@
 #ifndef __LIBSIGN_PACKET_H
 #define __LIBSIGN_PACKET_H
 
-#include "signature.h"
-#include "public_key.h"
-
 #include <stdint.h>
-#include <stdio.h>
-
-#include <pgp.h>
-#include <bignum.h>
 
 #ifdef __cplusplus
 extern "C" {
