@@ -181,19 +181,13 @@ int process_public_key_packet(const uint8_t **data, uint32_t *datalen,
     switch(ctx->pk_algo) {
     case PGP_RSA:
         /* RSA public modulus n */
-        mpz_init(ctx->n);
-        if(mpi_to_mpz(&p, &tmplen, &ctx->n) != 0) {
-            mpz_clear(ctx->n);
+        if(mpi_to_mpz(&p, &tmplen, &ctx->n) != 0)
             goto exit;
-        }
 
         /* RSA public encryption exponent e */
-        mpz_init(ctx->e);
-        if(mpi_to_mpz(&p, &tmplen, &ctx->e) != 0) {
-            mpz_clear(ctx->n);
-            mpz_clear(ctx->e);
+        if(mpi_to_mpz(&p, &tmplen, &ctx->e) != 0)
             goto exit;
-        }
+
         break;
     default:
         ret = -ENOTSUP;
