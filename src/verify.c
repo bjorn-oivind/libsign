@@ -75,31 +75,59 @@ int rsa_sha1_verify_file(libsign_public_key *pub_ctx, libsign_signature *sig_ctx
 int rsa_sha1_verify_fd(libsign_public_key *pub_ctx, libsign_signature *sig_ctx,
                        int fd)
 {
-    /* read and verify the contents of file given by fd */
+    /* hash the data from the given fd and verify the result */
     int ret = -EINVAL;
-    struct stat stbuf;
-    uint32_t filesize;
-    uint8_t *buffer;
+    ssize_t num = 0;
+    uint8_t buffer[512];
+    struct sha1_ctx hash;
+    struct rsa_public_key key;
 
-    /* find size of file */
-    if(fstat(fd, &stbuf) == -1)
+    rsa_public_key_init(&key);
+
+    mpz_set(key.n, pub_ctx->n);
+    mpz_set(key.e, pub_ctx->e);
+
+    rsa_public_key_prepare(&key);
+
+    /* hash the data */
+    sha1_init(&hash);
+    while((num = read(fd, buffer, 512)) > 0)
+        sha1_update(&hash, num, buffer);
+
+    if(num < 0)
         goto exit;
 
-    filesize = stbuf.st_size;
-    buffer = malloc(filesize);
-    if(!buffer) {
-        ret = -ENOMEM;
+    /* hash the hashed data from the signature */
+    sha1_update(&hash, sig_ctx->hashed_data_len,
+                sig_ctx->hashed_data);
+
+    /* then hash the trailer */
+    if(sig_ctx->version == PGP_SIG_VER4) {
+        uint8_t trailer[6];
+        /* version */
+        trailer[0] = 0x04;
+
+        trailer[1] = 0xff;
+
+        /* big-endian length of the hashed data from
+           the signature */
+        trailer[5] = sig_ctx->hashed_data_len;
+        trailer[4] = sig_ctx->hashed_data_len >> 8;
+        trailer[3] = sig_ctx->hashed_data_len >> 16;
+        trailer[2] = sig_ctx->hashed_data_len >> 24;
+
+        sha1_update(&hash, 6, trailer);
+    }
+    else {
         goto exit;
     }
 
-    if(read(fd, buffer, filesize) != filesize)
-        goto free_buffer;
+    if(rsa_sha1_verify(&key, &hash, sig_ctx->s))
+        ret = 0;
 
-    ret = rsa_sha1_verify_data(pub_ctx, sig_ctx, (const uint8_t*)buffer, filesize);
-
-free_buffer:
-    free(buffer);
 exit:
+    rsa_public_key_clear(&key);
+
     return ret;
 }
 
