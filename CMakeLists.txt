@@ -25,11 +25,7 @@ if(NOT WIN32)
 	endif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
 endif(NOT WIN32)
 
-# find nettle
-find_package(nettle)
-if(NOT Nettle_FOUND)
-	message(FATAL_ERROR "Nettle not found.")
-endif(NOT Nettle_FOUND)
+find_package(Nettle REQUIRED)
 
 include_directories(${Nettle_INCLUDE_DIRS} src)
 

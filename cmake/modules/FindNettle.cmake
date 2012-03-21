@@ -45,7 +45,7 @@ else(WIN32)
 
 endif()
 
-# handle the QUIETLY and REQUIRED arguments and set NETTLE_FOUND to TRUE if
+# handle the QUIET and REQUIRED arguments and set NETTLE_FOUND to TRUE if
 # all listed variables are TRUE
 include(FindPackageHandleStandardArgs)
 if(WIN32)
@@ -58,8 +58,8 @@ set(Nettle_FOUND ${NETTLE_FOUND})
 unset(NETTLE_FOUND)
 
 if(Nettle_FOUND)
-  set(Nettle_LIBRARIES ${Nettle_LIBRARY} ${Hogweed_LIBRARY} ${Hogweed_LIBRARY} ${Gmp_LIBRARY} CACHE STRING "Libraries used to link nettle")
-  set(Nettle_INCLUDE_DIRS ${Nettle_INCLUDE_DIR} ${Gmp_INCLUDE_DIR} CACHE STRING "Nettle include directories")
+  set(Nettle_LIBRARIES ${Nettle_LIBRARY} ${Hogweed_LIBRARY} ${Hogweed_LIBRARY} ${Gmp_LIBRARY})
+  set(Nettle_INCLUDE_DIRS ${Nettle_INCLUDE_DIR} ${Gmp_INCLUDE_DIR})
 endif()
 
 mark_as_advanced(Nettle_INCLUDE_DIR Nettle_LIBRARY Hogweed_LIBRARY Gmp_LIBRARY Gmp_INCLUDE_DIR)
