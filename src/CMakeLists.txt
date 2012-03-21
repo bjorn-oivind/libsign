@@ -22,7 +22,7 @@ set(LIB_SOURCES
 	sign.h sign.c
 	verify.h verify.c)
 add_library(sign STATIC ${LIB_SOURCES})
-target_link_libraries(sign ${NETTLE_LIBRARIES})
+target_link_libraries(sign ${Nettle_LIBRARIES})
 
 # compile with -fPIC if we need to
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_COMPILER_IS_GNUCC AND CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")

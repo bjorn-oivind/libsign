@@ -27,11 +27,11 @@ endif(NOT WIN32)
 
 # find nettle
 find_package(nettle)
-if(NOT NETTLE_FOUND)
+if(NOT Nettle_FOUND)
 	message(FATAL_ERROR "Nettle not found.")
-endif(NOT NETTLE_FOUND)
+endif(NOT Nettle_FOUND)
 
-include_directories(${NETTLE_INCLUDE_DIR} src)
+include_directories(${Nettle_INCLUDE_DIRS} src)
 
 add_subdirectory(src)
 add_subdirectory(tests)
