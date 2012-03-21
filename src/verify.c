@@ -77,7 +77,7 @@ int rsa_sha1_verify_fd(libsign_public_key *pub_ctx, libsign_signature *sig_ctx,
 {
     /* hash the data from the given fd and verify the result */
     int ret = -EINVAL;
-    ssize_t num = 0;
+    int num = 0;
     uint8_t buffer[512];
     struct sha1_ctx hash;
     struct rsa_public_key key;
