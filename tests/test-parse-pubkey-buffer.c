@@ -14,7 +14,7 @@
 
 int main()
 {
-    int ret, fd, armored = 0;
+    int ret = -1, fd, armored = 0;
     struct stat stbuf;
     uint32_t filesize, filename_len;
     uint8_t *buffer;
