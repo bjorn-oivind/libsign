@@ -1,7 +1,8 @@
 #ifndef __LIBSIGN_MPI_H
 #define __LIBSIGN_MPI_H
 
-#include <bignum.h>
+#include <stdint.h>
+#include <gmp.h>
 
 #ifdef __cplusplus
 extern "C" {

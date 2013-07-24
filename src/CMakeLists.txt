@@ -16,13 +16,16 @@ set(LIB_SOURCES
 	keystore.h keystore.c
         mpi.h mpi.c
 	packet.h packet.c
+        pgp.h pgp.c
         public_key.h public_key.c
+        rsa.h rsa.c
         secret_key.h secret_key.c
         signature.h signature.c
 	sign.h sign.c
+        sha1.h sha1.c
 	verify.h verify.c)
 add_library(sign STATIC ${LIB_SOURCES})
-target_link_libraries(sign ${Nettle_LIBRARIES})
+target_link_libraries(sign ${GMP_LIBRARIES})
 
 # compile with -fPIC if we need to
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_COMPILER_IS_GNUCC AND CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
@@ -42,4 +45,5 @@ install(FILES armor.h
                 sign.h
                 signature.h
                 verify.h
+                pgp.h
         DESTINATION include/libsign)

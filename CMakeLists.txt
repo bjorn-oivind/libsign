@@ -25,9 +25,9 @@ if(NOT WIN32)
 	endif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
 endif(NOT WIN32)
 
-find_package(Nettle REQUIRED)
+find_package(GMP REQUIRED)
 
-include_directories(${Nettle_INCLUDE_DIRS} src)
+include_directories(${GMP_INCLUDE_DIRS} src)
 
 add_subdirectory(src)
 add_subdirectory(tests)

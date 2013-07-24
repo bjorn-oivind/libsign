@@ -3,17 +3,13 @@
 
 #include <stdint.h>
 
-#include <pgp.h>
-#include <bignum.h>
+#include <gmp.h>
+
+#include "pgp.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-enum pgp_sig_version {
-    PGP_SIG_VER3    = 3,
-    PGP_SIG_VER4    = 4
-};
 
 typedef struct libsign_signature
 {

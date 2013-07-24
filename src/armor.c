@@ -1,9 +1,9 @@
 #include "armor.h"
+#include "pgp.h"
 #include "b64/cdecode.h"
 
 #include <errno.h>
 #include <stdlib.h>
-#include <pgp.h>
 
 int decode_armor(const uint8_t *armor_in, uint32_t armor_len, uint8_t **plain_out,
                  uint32_t *plain_len)
@@ -76,7 +76,7 @@ int decode_armor(const uint8_t *armor_in, uint32_t armor_len, uint8_t **plain_ou
     if(!pgp_plain)
         goto free_pgp;
 
-    actual_crc24 = nettle_pgp_crc24(plain_armor_len, pgp_plain);
+    actual_crc24 = pgp_crc24(plain_armor_len, pgp_plain);
 
     /* decode the CRC */
     base64_init_decodestate(&state);

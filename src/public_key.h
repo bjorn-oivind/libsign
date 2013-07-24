@@ -2,17 +2,13 @@
 #define __LIBSIGN_PUBLIC_KEY_H
 
 #include <stdint.h>
+#include <gmp.h>
 
-#include <pgp.h>
+#include "pgp.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-enum pgp_key_version {
-    PGP_KEY_VER3    = 3,
-    PGP_KEY_VER4    = 4
-};
 
 typedef struct libsign_userid {
     char *userid;

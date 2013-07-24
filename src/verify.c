@@ -7,8 +7,8 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sha.h>
-#include <rsa.h>
+
+#include "rsa.h"
 
 #ifndef _MSC_VER
 #include <unistd.h>
@@ -122,8 +122,7 @@ int rsa_sha1_verify_fd(libsign_public_key *pub_ctx, libsign_signature *sig_ctx,
         goto exit;
     }
 
-    if(rsa_sha1_verify(&key, &hash, sig_ctx->s))
-        ret = 0;
+    ret = rsa_sha1_verify(&key, &hash, sig_ctx->s);
 
 exit:
     rsa_public_key_clear(&key);
@@ -173,8 +172,7 @@ int rsa_sha1_verify_data(libsign_public_key *pub_ctx, libsign_signature *sig_ctx
         goto exit;
     }
 
-    if(rsa_sha1_verify(&key, &hash, sig_ctx->s))
-        ret = 0;
+    ret = rsa_sha1_verify(&key, &hash, sig_ctx->s);
 
 exit:
     rsa_public_key_clear(&key);
