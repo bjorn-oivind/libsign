@@ -43,19 +43,18 @@ void rsa_public_key_clear(rsa_public_key *key)
 
 int rsa_sha1_verify(rsa_public_key *key, sha1_ctx *hash, mpz_t signature)
 {
-    int ret = -EBADMSG;
+    int ret = -EBADMSG, id_idx;
+    uint8_t *prefix, *p;
     mpz_t msg, expected;
 
     mpz_init(msg);
 
     /* add PKCS#1 prefix to hash, consists of 0x00, 0x01, 0xff ... 0xff, 0x00, id, hash */
-    uint8_t *prefix, *p;
-
     prefix = malloc(key->size);
     if(!prefix)
         goto exit;
 
-    int id_idx = key->size - SHA1_DIGEST_LENGTH - sizeof(rsa_pkcs1_sha1_prefix);
+    id_idx = key->size - SHA1_DIGEST_LENGTH - sizeof(rsa_pkcs1_sha1_prefix);
 
     p = prefix;
     *p++ = 0;
