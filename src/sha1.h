@@ -29,7 +29,6 @@
 #ifndef __LIBSIGN_SHA1_H
 #define __LIBSIGN_SHA1_H
 
-#include <endian.h>
 #include <stddef.h>
 #include <stdint.h>
 
