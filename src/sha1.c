@@ -34,9 +34,14 @@
 /* blk0() and blk() perform the initial expand. */
 /* I got the idea of expanding during the round function from SSLeay */
 
-#ifdef BIG_ENDIAN
-#define blk0(i) block->l[i]
-#else
+#ifdef BYTE_ORDER
+#  if BYTE_ORDER == BIG_ENDIAN
+#    define blk0(i) block->l[i]
+#  else
+#    define blk0(i) (block->l[i] = (rol(block->l[i],24)&(uint32_t)0xFF00FF00) \
+    |(rol(block->l[i],8)&(uint32_t)0x00FF00FF))
+#  endif
+#else /* assume little endian by default */
 #define blk0(i) (block->l[i] = (rol(block->l[i],24)&(uint32_t)0xFF00FF00) \
         |(rol(block->l[i],8)&(uint32_t)0x00FF00FF))
 #endif
