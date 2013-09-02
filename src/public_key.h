@@ -16,7 +16,7 @@ typedef struct libsign_userid {
 
 typedef struct libsign_public_key {
     enum pgp_key_version version;
-    uint32_t created;
+    libsign_timestamp created;
     enum pgp_public_key_algorithm pk_algo;
 
     uint8_t num_userids;

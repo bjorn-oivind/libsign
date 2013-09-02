@@ -18,8 +18,8 @@
 
 void signature_init(libsign_signature *sig)
 {
+    memset(sig, 0, sizeof(libsign_signature));
     mpz_init(sig->s);
-    sig->hashed_data = NULL;
 }
 
 void signature_destroy(libsign_signature *sig)
@@ -194,7 +194,8 @@ int process_signature_packet(const uint8_t **data, uint32_t *datalen,
         *hashed_data++ = *hashed_data_start++;
 
     if(subdatalen) {
-        process_signature_subpackets(&p, &tmplen, subdatalen, ctx);
+        if((ret = process_signature_subpackets(&p, &tmplen, subdatalen, ctx)))
+            goto free_hashed_data;
     }
     /* end of hashed data */
 
@@ -209,7 +210,8 @@ int process_signature_packet(const uint8_t **data, uint32_t *datalen,
     }
 
     if(subdatalen) {
-        process_signature_subpackets(&p, &tmplen, subdatalen, ctx);
+        if((ret = process_signature_subpackets(&p, &tmplen, subdatalen, ctx)))
+            goto free_hashed_data;
     }
 
     /* short hash */
@@ -246,11 +248,72 @@ free_hashed_data:
 int process_signature_subpackets(const uint8_t **data, uint32_t *datalen,
                                  int subdatalen, libsign_signature *ctx)
 {
-    /* TODO: parse subpackets. Length has already been checked. */
-    (void)ctx;
-    *data += subdatalen;
-    *datalen -= subdatalen;
-    return 0;
+    int ret = -EINVAL;
+    const uint8_t *p = *data;
+    while(subdatalen) {
+        const uint8_t *prev = p;
+        /* find length of subpacket (5.2.3.1) */
+        uint32_t len;
+        /* one octet length */
+        if(*p < 192)
+            len = *p++;
+        /* two octet length */
+        else if(*p < 255) {
+            len = ((*p++) - 192) << 8;
+            len += (*p++) + 192;
+        }
+        /* five octet length */
+        else {
+            /* length is represented as a four octet scalar starting at second octet */
+            p++;
+            len = (*p++ << 24);
+            len |= (*p++ << 16);
+            len |= (*p++ << 8);
+            len |= (*p++);
+        }
+        /* p now points at the type octet */
+        /* len includes the type octet, we're going to consume this in the switch, so decrement len here */
+        len--;
+        switch(*p++) {
+        case PGP_SIG_CREATION_TIME:
+            /* 5.2.3.4 - 4 octet time field */
+            if(len != 4)
+                goto exit;
+
+            ctx->creation_time = (*p++ << 24);
+            ctx->creation_time |= (*p++ << 16);
+            ctx->creation_time |= (*p++ << 8);
+            ctx->creation_time |= (*p++);
+            break;
+        case PGP_SIG_ISSUER:
+            /* 5.2.3.5 - 8 octet key id */
+            if(len != 8)
+                goto exit;
+
+            ctx->issuer = ((uint64_t)(*p++) << 56);
+            ctx->issuer |= ((uint64_t)(*p++) << 48);
+            ctx->issuer |= ((uint64_t)(*p++) << 40);
+            ctx->issuer |= ((uint64_t)(*p++) << 32);
+            ctx->issuer |= ((uint64_t)(*p++) << 24);
+            ctx->issuer |= ((uint64_t)(*p++) << 16);
+            ctx->issuer |= ((uint64_t)(*p++) << 8);
+            ctx->issuer |= (*p++);
+            break;
+        default:
+            /* TODO: support all subtypes */
+            p += len;
+            break;
+        }
+        subdatalen -= (p - prev);
+        *datalen -= (p - prev);
+    }
+
+    *data = p;
+
+    ret = 0;
+
+exit:
+    return ret;
 }
 
 int decode_signature_armor(const uint8_t *data, uint32_t datalen, uint8_t **plain_out,

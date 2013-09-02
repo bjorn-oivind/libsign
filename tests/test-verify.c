@@ -29,6 +29,9 @@ int main()
     if(ret < 0)
         goto exit;
 
+    if(sig.issuer != 0x1EB5F06127342502ULL)
+        goto exit;
+
     ret = verify(&pub, &sig, "files/vmImage");
     if(ret < 0)
         goto exit;
