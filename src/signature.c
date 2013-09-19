@@ -91,6 +91,9 @@ int parse_signature_buffer(libsign_signature *sig, const uint8_t *buffer,
     int ret = -EINVAL;
     uint32_t packet_size;
 
+    if(!datalen)
+        goto exit;
+
     /* parse packet headers */
     while(datalen) {
         int tag = parse_packet_header(&buffer, &datalen, &packet_size);
