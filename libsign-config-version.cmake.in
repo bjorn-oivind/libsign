@@ -1,0 +1,18 @@
+# Version configuration for the libsign package.
+# Defines the following variables:
+#  PACKAGE_VERSION              - the version of libsign
+#  PACKAGE_VERSION_COMPATIBLE   - is this version compatbile with the requested version
+#  PACKAGE_VERSION_EXACT        - is this version the exact version that was requested?
+#
+
+set(PACKAGE_VERSION "@LIBRARY_VERSION@")
+
+# check if we are compatible
+if("${PACKAGE_VERSION}" VERSION_LESS "${PACKAGE_FIND_VERSION}")
+    set(PACKAGE_VERSION_COMPATIBLE FALSE)
+else()
+    set(PACKAGE_VERSION_COMPATIBLE TRUE)
+    if("${PACKAGE_VERSION}" VERSION_EQUAL "${PACKAGE_FIND_VERSION}")
+        set(PACKAGE_VERSION_EXACT TRUE)
+    endif()
+endif()
