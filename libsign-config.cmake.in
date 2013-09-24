@@ -1,0 +1,26 @@
+# Configuration file for the libsign package.
+# Defines the following variables:
+#  libsign_INCLUDE_DIRS  - include search path.
+#  libsign_LIBRARIES     - libraries to link.
+#  libsign_LIBRARIES_DIR - the absolute path to the libsign libraries folder.
+#  GMP_INCLUDE_DIRS  - include search path
+#  GMP_LIBARIES      - libraries to link with
+#  GMP_LIBARY_DLL    - library DLL to install. Only available on WIN32.
+#  GMP_LIBRARIES_DIR - the directory the library we link with is found in.
+
+# dependencies
+set(BACKUP ${CMAKE_MODULE_PATH})
+get_filename_component(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_FILE}" PATH)
+find_package(GMP REQUIRED)
+set(CMAKE_MODULE_PATH ${BACKUP})
+
+# include dirs
+set(libsign_INCLUDE_DIRS "@LIBRARY_INCLUDE_DIRS@" ${GMP_INCLUDE_DIRS})
+
+# imported targets
+get_filename_component(LIBSIGN_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+include("${LIBSIGN_CMAKE_DIR}/signTargets.cmake")
+
+# imported target from libsign-targets.cmake and libraries from gmp
+set(libsign_LIBRARIES sign ${GMP_LIBRARIES})
+get_target_property(libsign_LIBRARIES_DIR sign IMPORTED_LOCATION)
