@@ -10,7 +10,7 @@ int decode_armor(const uint8_t *armor_in, uint32_t armor_len, uint8_t **plain_ou
 {
     int ret = -EINVAL;
     const uint8_t *armor_start, *crc_start;
-    uint8_t *pgp_plain;
+    uint8_t *pgp_plain, *pgp_realloced;
     uint32_t actual_crc24, expected_crc24, crc_plain;
     uint32_t i, encoded_armor_len, plain_armor_len;
     base64_decodestate state;
@@ -71,10 +71,14 @@ int decode_armor(const uint8_t *armor_in, uint32_t armor_len, uint8_t **plain_ou
     base64_init_decodestate(&state);
     plain_armor_len = base64_decode_block((char*)armor_start, encoded_armor_len, (char*)pgp_plain, &state);
 
-    /* give back the memory we don't need */
-    pgp_plain = realloc(pgp_plain, plain_armor_len);
-    if(!pgp_plain)
+    /* give back the memory we don't need, note that realloc is not responsible for cleaning up
+       the original malloc'ed memory if it fails, so we need to keep the original pointer for cleaning
+       purposes in case realloc fails (by returning NULL). */
+    pgp_realloced = realloc(pgp_plain, plain_armor_len);
+    if(!pgp_realloced)
         goto free_pgp;
+
+    pgp_plain = pgp_realloced;
 
     actual_crc24 = pgp_crc24(plain_armor_len, pgp_plain);
 

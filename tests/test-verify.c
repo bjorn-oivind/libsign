@@ -3,15 +3,21 @@
 #include "public_key.h"
 
 #include <stdio.h>
+#include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef _MSC_VER
+#include <unistd.h>
+#define O_BINARY 0
+#endif
+
 int main()
 {
-    int ret;
-    FILE *fp = NULL;
+    int ret, fd = -1;
     struct stat st;
     uint8_t *data = NULL, *data_backup = NULL;
 
@@ -36,7 +42,11 @@ int main()
     if(ret < 0)
         goto exit;
 
-    ret = stat("files/vmImage", &st);
+    fd = open("files/vmImage", O_BINARY);
+    if(fd < 0)
+        goto exit;
+
+    ret = fstat(fd, &st);
     if(ret < 0)
         goto exit;
 
@@ -47,13 +57,7 @@ int main()
         goto exit;
     }
 
-    fp = fopen("files/vmImage", "r");
-    if(!fp) {
-        ret = -errno;
-        goto exit;
-    }
-
-    if(fread(data, sizeof(uint8_t), st.st_size, fp) != (size_t)st.st_size) {
+    if(read(fd, data, st.st_size) != (uint32_t)st.st_size) {
         ret = -1;
         goto exit;
     }
@@ -66,8 +70,8 @@ int main()
 
     ret = memcmp(data, data_backup, st.st_size) != 0;
 exit:
-    if(fp)
-        fclose(fp);
+    if(fd >= 0)
+        close(fd);
 
     signature_destroy(&sig);
     public_key_destroy(&pub);
